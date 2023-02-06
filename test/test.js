@@ -1,9 +1,8 @@
-"use strict";
+var KissFFTModule = require("../libkissfft-wasm/KissFFT");
 
-var KissFFTModule = require('../libkissfft-wasm/KissFFT');
+KissFFTModule().then((module) => {
 
-
-var kissFFTModule = KissFFTModule({});
+var kissFFTModule = module;
 
 var kiss_fftr_alloc = kissFFTModule.cwrap(
     'kiss_fftr_alloc', 'number', ['number', 'number', 'number', 'number' ]
@@ -94,7 +93,45 @@ var FFTR = function (size) {
     }
 };
 
-module.exports = {
-    FFT: FFT,
-    FFTR: FFTR
+var A2_1024 = require('../test/audioBuffer');
+
+
+var scaleTransform = function(trans, size) {
+    var i = 0,
+        bSi = 1.0 / size,
+        x = trans;
+    while(i < x.length) {
+        x[i] *= bSi; i++;
+    }
+    return x;
 };
+
+function getMiscRealBuffer(size) {
+    var result = new Float32Array(size);
+    for (var i = 0; i < result.length; i++)
+        result[i] = (i % 2) / 4.0;
+    return result;
+}
+
+var compareArray = (a, b) => {
+    const tf = [0,0];
+    for (let i = 0; i < a.length; i++) {
+        if (Math.abs(a[i] - b[i]) < 0.0000005) tf[0]++;
+        else tf[1]++
+    }
+    return tf;
+};
+
+var size = A2_1024.length;
+var fftr = new FFTR(size);
+var transform = fftr.forward(A2_1024);
+var transScaled = scaleTransform(transform, size);
+var a2_again = fftr.inverse(transScaled);
+
+// Just to show how you can clean up after you're done ;)
+fftr.dispose();  // fftr is now no longer usable for FFTs
+console.log(compareArray(a2_again, A2_1024));
+
+
+});
+

@@ -1,0 +1,28 @@
+KISSFFFT_DIR=kissfft-131.1.0
+
+EXPORTED_FUNCTIONS="['_kiss_fftr_alloc',\
+	'_kiss_fftr',\
+	'_kiss_fftri',\
+	'_kiss_fft_alloc',\
+	'_kiss_fft',\
+	'_kiss_fft_cleanup',\
+	'_malloc',\
+	'_free']"
+
+EXPORTED_RUNTIME_METHODS="['ccall', 'cwrap']"
+
+libkissfft.js:	${KISSFFFT_DIR}/kiss_fft.c ${KISSFFFT_DIR}/kiss_fft.h ${KISSFFFT_DIR}/_kiss_fft_guts.h ${KISSFFFT_DIR}/kiss_fftr.c ${KISSFFFT_DIR}/kiss_fftr.h Makefile.emscripten
+	emcc -O3 -I. \
+	     --memory-init-file 0 \
+	     -s NO_FILESYSTEM=1 \
+	     -s PRECISE_F32=1 \
+	     -s MODULARIZE=1 \
+	     -s EXPORT_NAME="'KissFFTModule'" \
+	     -s EXPORTED_FUNCTIONS=${EXPORTED_FUNCTIONS} \
+		 -s EXPORTED_RUNTIME_METHODS=$(EXPORTED_RUNTIME_METHODS) \
+	     -o libkissfft.js \
+	     ${KISSFFFT_DIR}/kiss_fft.c ${KISSFFFT_DIR}/kiss_fftr.c
+
+clean:
+	rm -f libkissfft.js libkissfft.wasm
+

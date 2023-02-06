@@ -1,27 +1,39 @@
 {
-  "name": "kissfft-js",
+  "name": "@shren/kissfft-js",
   "version": "0.1.8",
   "description": "Javascript port of KissFFT via Emscripten",
-  "main": "src/main.js",
+  "main": "dist/esm/index.js",
+  "types": "dist/esm/index.d.ts",
+  "type": "module",
   "scripts": {
-    "test": "mocha"
+    "build": "npm run build-cjs && npm run build-cjs-bundle && npm run build-esm && npm run build-esm-bundle && node postbuild-bundled.js & npm run build-types & npm run build-types-bundle",
+    "build-cjs": "esbuild src/index.ts --target=es2019 --bundle --sourcemap --outdir=dist/cjs --format=iife --external:fs --external:url",
+    "build-cjs-bundle": "node prebuild-bundled.js && esbuild src/index-bundle-iife.ts --target=es2019 --bundle --sourcemap --loader:.wasm=binary --loader:.data=binary --outfile=dist/cjs-bundle/index.js --format=iife --external:fs --external:url --external:path && node postbuild-bundled.js",
+    "build-esm": "esbuild src/index.ts --target=es2019 --bundle --sourcemap --outdir=dist/esm --format=esm --external:fs --external:url",
+    "build-esm-bundle": "node prebuild-bundled.js && esbuild src/index-bundle.ts --target=es2019 --bundle --sourcemap --loader:.wasm=binary --loader:.data=binary --outfile=dist/esm-bundle/index.js --format=esm --external:fs --external:url --external:path && node postbuild-bundled.js",
+    "build-types": "dts-bundle-generator -o dist/cjs/index.d.ts src/index.ts --external-imports",
+    "build-types-bundle": "dts-bundle-generator -o dist/cjs-bundle/index.d.ts src/index-bundle.ts --external-imports",
+    "postbuild": "node postbuild.js",
+    "test": "jest"
   },
   "repository": {
     "type": "git",
-    "url": "git@github.com:j-funk/kissfft-js"
+    "url": "git+https://github.com/fr0stbyter/kissfft-js"
   },
-  "engines": {
-    "node": ">=4.4.7"
+  "author": "j-funk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fr0stbyter/kissfft-js/issues"
   },
-  "keywords": [
-    "FFT",
-    "DSP",
-    "fast-fourier-transform",
-    "digital-signal-processing"
-  ],
+  "homepage": "https://github.com/fr0stbyter/kissfft-js#readme",
   "devDependencies": {
-    "mocha": "*",
-    "chai": "*"
-  },
-  "license": "MIT"
+    "@types/emscripten": "^1.39.6",
+    "@types/jest": "^29.4.0",
+    "@types/node": "^18.11.19",
+    "dts-bundle-generator": "^7.2.0",
+    "esbuild": "^0.17.5",
+    "esbuild-jest": "^0.5.0",
+    "jest": "^29.4.1",
+    "typescript": "^4.5.3"
+  }
 }

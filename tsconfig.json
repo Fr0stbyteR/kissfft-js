@@ -1,0 +1,22 @@
+{
+    "compilerOptions": {
+        "checkJs": true,
+        "esModuleInterop": true,
+        "module": "ESNext",
+        "moduleResolution": "Node",
+        "target": "ES2020",
+        "sourceMap": true,
+        "outDir": "dist",
+        "noImplicitAny": true
+    },
+    "include": [
+        "src/**/*"
+    ],
+    "exclude": [
+        "dist",
+        "node_modules",
+        "libfaust-wasm",
+        "test",
+        "assets"
+    ]
+}

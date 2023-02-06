@@ -1,5 +1,6 @@
+KISSFFFT_DIR=kissfft-131.1.0
 
-KissFFT.js:	kiss_fft.c kiss_fft.h _kiss_fft_guts.h tools/kiss_fftr.c tools/kiss_fftr.h Makefile.emscripten
+KissFFT.js:	${KISSFFFT_DIR}/kiss_fft.c ${KISSFFFT_DIR}/kiss_fft.h ${KISSFFFT_DIR}/_kiss_fft_guts.h ${KISSFFFT_DIR}/kiss_fftr.c ${KISSFFFT_DIR}/kiss_fftr.h Makefile.emscripten
 	emcc -O3 -I. \
 	     --memory-init-file 0 \
 	     -s NO_FILESYSTEM=1 \
@@ -9,7 +10,7 @@ KissFFT.js:	kiss_fft.c kiss_fft.h _kiss_fft_guts.h tools/kiss_fftr.c tools/kiss_
 	     -s EXPORT_NAME="'KissFFTModule'" \
 	     -s EXPORTED_FUNCTIONS="['_kiss_fftr_alloc','_kiss_fftr','_kiss_fftri','_kiss_fftr_free','_kiss_fft_alloc','_kiss_fft','_kiss_fft_free',]" \
 	     -o KissFFT.js \
-	     kiss_fft.c tools/kiss_fftr.c
+	     ${KISSFFFT_DIR}/kiss_fft.c ${KISSFFFT_DIR}/kiss_fftr.c
 
 clean:
 	rm -f KissFFT.js
