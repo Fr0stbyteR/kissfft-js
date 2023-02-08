@@ -12,7 +12,7 @@ export interface KissFFTModule extends EmscriptenModule {
 }
 
 export interface InterfaceFFT {
-    forward(arr: ArrayLike<number>): Float32Array;
-    inverse(arr: ArrayLike<number>): Float32Array;
+    forward(arr: ArrayLike<number> | ((arr: Float32Array) => any)): Float32Array;
+    inverse(arr: ArrayLike<number> | ((arr: Float32Array) => any)): Float32Array;
     dispose(): void;
 }

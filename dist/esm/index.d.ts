@@ -15,8 +15,8 @@ export interface KissFFTModule extends EmscriptenModule {
 	_kiss_fft: (cfg: number, $ffin: number, $fout: number) => void;
 }
 export interface InterfaceFFT {
-	forward(arr: ArrayLike<number>): Float32Array;
-	inverse(arr: ArrayLike<number>): Float32Array;
+	forward(arr: ArrayLike<number> | ((arr: Float32Array) => any)): Float32Array;
+	inverse(arr: ArrayLike<number> | ((arr: Float32Array) => any)): Float32Array;
 	dispose(): void;
 }
 /**
@@ -27,9 +27,11 @@ export interface InterfaceFFT {
  */
 export declare const instantiateKissFFTModuleFromFile: (jsFile: string, wasmFile?: string, dataFile?: string) => Promise<KissFFTModule>;
 export declare class KissFFT {
-	FFT: new (size: number) => InterfaceFFT;
-	FFTR: new (size: number) => InterfaceFFT;
+	private _FFT;
+	private _FFTR;
 	constructor(kissFFTModule: KissFFTModule);
+	get FFT(): new (size: number) => InterfaceFFT;
+	get FFTR(): new (size: number) => InterfaceFFT;
 }
 
 export {};

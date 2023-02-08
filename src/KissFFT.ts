@@ -1,8 +1,8 @@
 import type { InterfaceFFT, KissFFTModule } from "./types";
 
 class KissFFT {
-    FFT: new (size: number) => InterfaceFFT;
-    FFTR: new (size: number) => InterfaceFFT;
+    private _FFT: new (size: number) => InterfaceFFT;
+    private _FFTR: new (size: number) => InterfaceFFT;
     constructor(kissFFTModule: KissFFTModule) {
         const {
             _kiss_fftr_alloc,
@@ -14,7 +14,6 @@ class KissFFT {
             _free,
             _malloc
         } = kissFFTModule;
-
         class FFT implements InterfaceFFT {
             size: number;
             fcfg: number;
@@ -35,16 +34,18 @@ class KissFFT {
                 this.cout = new Float32Array(kissFFTModule.HEAPU8.buffer, this.outptr, size * 2);
             }
 
-            forward(cin: ArrayLike<number>) {
-                this.cin.set(cin);
+            forward(cin: ArrayLike<number> | ((arr: Float32Array) => any)) {
+                if (typeof cin === "function") cin(this.cin);
+                else this.cin.set(cin);
                 _kiss_fft(this.fcfg, this.inptr, this.outptr);
-                return new Float32Array(kissFFTModule.HEAPU8.buffer, this.outptr, this.size * 2);
+                return this.cout;
             }
 
-            inverse(cpx: ArrayLike<number>) {
-                this.cin.set(cpx);
+            inverse(cpx: ArrayLike<number> | ((arr: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.cin);
+                else this.cin.set(cpx);
                 _kiss_fft(this.icfg, this.inptr, this.outptr);
-                return new Float32Array(kissFFTModule.HEAPU8.buffer, this.outptr, this.size * 2);
+                return this.cout;
             }
 
             dispose() {
@@ -52,7 +53,6 @@ class KissFFT {
                 _kiss_fft_cleanup();
             }
         }
-
         class FFTR implements InterfaceFFT {
             size: number;
             fcfg: number;
@@ -72,28 +72,28 @@ class KissFFT {
                 this.ri = new Float32Array(kissFFTModule.HEAPU8.buffer, this.rptr, size);
                 this.ci = new Float32Array(kissFFTModule.HEAPU8.buffer, this.cptr, size + 2);
             }
-
-            forward(real: ArrayLike<number>) {
-                this.ri.set(real);
+            forward(real: ArrayLike<number> | ((arr: Float32Array) => any)) {
+                if (typeof real === "function") real(this.ri);
+                else this.ri.set(real);
                 _kiss_fftr(this.fcfg, this.rptr, this.cptr);
-                return new Float32Array(kissFFTModule.HEAPU8.buffer, this.cptr, this.size + 2);
+                return this.ci;
             }
-
-            inverse(cpx: ArrayLike<number>) {
-                this.ci.set(cpx);
+            inverse(cpx: ArrayLike<number> | ((arr: Float32Array) => any)) {
+                if (typeof cpx === "function") cpx(this.ci);
+                else this.ci.set(cpx);
 	            _kiss_fftri(this.icfg, this.cptr, this.rptr);
-	            return new Float32Array(kissFFTModule.HEAPU8.buffer, this.rptr, this.size);
+	            return this.ri;
             }
-
             dispose() {
                 _free(this.rptr);
                 _kiss_fft_cleanup();
             }
         }
-
-        this.FFT = FFT;
-        this.FFTR = FFTR
+        this._FFT = FFT;
+        this._FFTR = FFTR;
     }
+    get FFT() { return this._FFT }
+    get FFTR() { return this._FFTR }
 }
 
 export default KissFFT;
